@@ -196,8 +196,15 @@ void NVDAGPUWakeHandler::disableGPU()
 IOReturn NVDAGPUWakeHandler::setPowerState ( unsigned long whichState, IOService * whatDevice )
 {
     if ( whichState != kIOPMPowerOff ) {
-        IOLog("Waking up\n");
-        this->disableGPU();
+        int discreteState = get_discrete_state();
+        IOLog("DiscreteState %d!\n", discreteState);
+        
+        if (discreteState == 0x3) {
+            IOLog("We need to switch it off!\n");
+            this->disableGPU();
+        }
+        else
+            IOLog("It's already off!\n");
         // Major hack: there must be some ordering dependency that is not
         // being respected--doing it once will not take effect.
         // So we retry a few times after wake to make sure it sticks.
